@@ -1,46 +1,76 @@
 package ci.univ;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+
 public class PasswordValidator {
 
     public ValidationResult validate(String password) {
 
-        int score = 0;
+        try {
 
-        if (password.length() >= 8) score++;
-        if (password.length() >= 12) score++;
+            ProcessBuilder processBuilder = new ProcessBuilder(
+                    "docker",
+                    "exec",
+                    "password-validator",
+                    "node",
+                    "/app/validator.js",
+                    password
+            );
 
-        if (password.matches(".*[A-Z].*")) score++;
-        if (password.matches(".*[a-z].*")) score++;
-        if (password.matches(".*\\d.*")) score++;
-        if (password.matches(".*[^a-zA-Z0-9].*")) score++;
+            Process process = processBuilder.start();
 
-        PasswordStrength strength;
-        String crackTime;
+            BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(process.getInputStream())
+            );
 
-        if (score <= 2) {
-            strength = PasswordStrength.VERY_WEAK;
-            crackTime = "Quelques secondes";
-        }
-        else if (score <= 3) {
-            strength = PasswordStrength.WEAK;
-            crackTime = "Quelques minutes";
-        }
-        else if (score <= 4) {
-            strength = PasswordStrength.MEDIUM;
-            crackTime = "Quelques heures";
-        }
-        else if (score <= 5) {
-            strength = PasswordStrength.STRONG;
-            crackTime = "Plusieurs années";
-        }
-        else {
-            strength = PasswordStrength.VERY_STRONG;
-            crackTime = "Des milliers d'années";
-        }
+            String result = reader.readLine();
 
-        return new ValidationResult(
-                strength,
-                crackTime
-        );
+            process.waitFor();
+
+            PasswordStrength strength;
+            String crackTime;
+
+            if (result != null && result.contains("\"score\":4")) {
+
+                strength = PasswordStrength.VERY_STRONG;
+                crackTime = "Des milliers d'années";
+
+            } else if (result != null && result.contains("\"score\":3")) {
+
+                strength = PasswordStrength.STRONG;
+                crackTime = "Plusieurs années";
+
+            } else if (result != null && result.contains("\"score\":2")) {
+
+                strength = PasswordStrength.MEDIUM;
+                crackTime = "Quelques heures";
+
+            } else if (result != null && result.contains("\"score\":1")) {
+
+                strength = PasswordStrength.WEAK;
+                crackTime = "Quelques minutes";
+
+            } else {
+
+                strength = PasswordStrength.VERY_WEAK;
+                crackTime = "Quelques secondes";
+            }
+
+            return new ValidationResult(
+                    strength,
+                    crackTime
+            );
+
+        } catch (Exception e) {
+
+            // Si Docker n'est pas disponible,
+            // le programme continue de fonctionner.
+
+            return new ValidationResult(
+                    PasswordStrength.VERY_WEAK,
+                    "Docker non disponible"
+            );
+        }
     }
 }

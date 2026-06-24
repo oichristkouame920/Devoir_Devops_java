@@ -2,7 +2,7 @@
 
 ## Description
 
-Ce projet est une application Java 21 en ligne de commande (CLI) permettant de générer des mots de passe robustes selon différents paramètres définis par l'utilisateur.
+Ce projet est une application Java 21 en ligne de commande (CLI) permettant de générer des mots de passe robustes selon différents options définis par l'utilisateur.
 
 L'application permet également d'évaluer la robustesse des mots de passe générés en s'appuyant sur un service de validation exécuté dans un conteneur Docker.
 
