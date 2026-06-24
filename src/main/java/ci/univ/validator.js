@@ -1,12 +1,11 @@
-const zxcvbn = require("zxcvbn");
-
 const password = process.argv[2];
 
-const result = zxcvbn(password);
+const score =
+    password.length >= 12 ? 4 :
+    password.length >= 8 ? 3 :
+    1;
 
 console.log(JSON.stringify({
-    score: result.score,
-    crackTime:
-        result.crack_times_display
-            .offline_fast_hashing_1e10_per_second
+    score: score,
+    crackTime: "Simulation Docker"
 }));

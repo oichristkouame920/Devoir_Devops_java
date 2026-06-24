@@ -1,4 +1,4 @@
-package main.java.ci.univ;
+package ci.univ;
 
 public class ValidationResult {
 

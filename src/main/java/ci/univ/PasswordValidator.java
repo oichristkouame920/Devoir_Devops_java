@@ -1,50 +1,46 @@
-package main.java.ci.univ;
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+package ci.univ;
 
 public class PasswordValidator {
 
     public ValidationResult validate(String password) {
 
-        try {
+        int score = 0;
 
-            ProcessBuilder pb = new ProcessBuilder(
-                    "docker",
-                    "exec",
-                    "password-validator",
-                    "node",
-                    "/app/validator.js",
-                    password
-            );
+        if (password.length() >= 8) score++;
+        if (password.length() >= 12) score++;
 
-            Process process = pb.start();
+        if (password.matches(".*[A-Z].*")) score++;
+        if (password.matches(".*[a-z].*")) score++;
+        if (password.matches(".*\\d.*")) score++;
+        if (password.matches(".*[^a-zA-Z0-9].*")) score++;
 
-            BufferedReader reader =
-                    new BufferedReader(
-                            new InputStreamReader(
-                                    process.getInputStream()
-                            )
-                    );
+        PasswordStrength strength;
+        String crackTime;
 
-            String result = reader.readLine();
-
-            process.waitFor();
-
-            // Ici normalement on analyserait le JSON
-            // retourné par validator.js
-
-            return new ValidationResult(
-                    PasswordStrength.STRONG,
-                    result
-            );
-
-        } catch (Exception e) {
-
-            return new ValidationResult(
-                    PasswordStrength.VERY_WEAK,
-                    "Docker non disponible"
-            );
+        if (score <= 2) {
+            strength = PasswordStrength.VERY_WEAK;
+            crackTime = "Quelques secondes";
         }
+        else if (score <= 3) {
+            strength = PasswordStrength.WEAK;
+            crackTime = "Quelques minutes";
+        }
+        else if (score <= 4) {
+            strength = PasswordStrength.MEDIUM;
+            crackTime = "Quelques heures";
+        }
+        else if (score <= 5) {
+            strength = PasswordStrength.STRONG;
+            crackTime = "Plusieurs années";
+        }
+        else {
+            strength = PasswordStrength.VERY_STRONG;
+            crackTime = "Des milliers d'années";
+        }
+
+        return new ValidationResult(
+                strength,
+                crackTime
+        );
     }
 }
