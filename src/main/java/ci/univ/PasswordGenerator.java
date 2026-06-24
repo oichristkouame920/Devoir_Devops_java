@@ -6,7 +6,7 @@ public class PasswordGenerator {
 
     private static final String UPPER =
             "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
+ 
     private static final String LOWER =
             "abcdefghijklmnopqrstuvwxyz";
 
