@@ -1,4 +1,4 @@
-#Generateur de mot passe
+##Generateur de mot passe
 
 ## Description
 
